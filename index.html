@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tỏ tình — Chọn đi!</title>
+  <style>
+    :root{
+      --bg:#ffd6e8;
+      --accent:#ff4d6d;
+      --accent2:#ff90b3;
+      --text:#4a1d2f;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .card{
+      width:min(920px,94vw);
+      height:min(520px,80vh);
+      background:rgba(255,255,255,0.5);
+      border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,0.3);
+      padding:28px;position:relative;overflow:hidden;
+    }
+    h1{margin:6px 0 14px;font-size:26px;color:#b30047;}
+    p{margin:0 0 18px;color:#661a3d}
+
+    .playground{position:relative;width:100%;height:calc(100% - 110px);border-radius:12px;background:rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center}
+
+    .btn{
+      --size:120px;
+      width:var(--size);height:var(--size);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:18px;cursor:pointer;user-select:none;position:absolute;transition:transform .12s ease,box-shadow .12s ease;
+      box-shadow:0 6px 18px rgba(0,0,0,0.25);
+      border:none;
+    }
+    .btn:active{transform:scale(.98)}
+
+    .yes{background:linear-gradient(135deg,var(--accent2), #ff6f91);color:white;left:calc(50% - 180px);}
+    .no{background:linear-gradient(135deg,#fff,#ffb3c6);color:#ff003c;left:calc(50% + 60px);}
+
+    .hint{position:absolute;left:22px;bottom:16px;color:#800040;font-size:13px}
+
+    @media (max-width:520px){
+      .btn{--size:84px;font-size:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1>LÀM NGƯỜI YÊU TUI NHAAAAAAAA 💞</h1>
+    <div class="playground" id="playground">
+      <button class="btn yes" id="yesBtn">Yes 💖</button>
+      <button class="btn no" id="noBtn">No 😅</button>
+    </div>
+    <audio id="mussic" src="xungdoicuoithoi.mp3"></audio>
+  </div>
+
+  <script>
+    (function(){
+      const playground = document.getElementById('playground');
+      const yes = document.getElementById('yesBtn');
+      const no = document.getElementById('noBtn');
+      const audio = document.getElementById('mussic');
+
+      function setInitialPositions(){
+        const pw = playground.clientWidth;
+        const ph = playground.clientHeight;
+        const btnW = no.offsetWidth;
+        const btnH = no.offsetHeight;
+        yes.style.top = (ph/2 - btnH/2) + 'px';
+        yes.style.left = (pw/2 - 180) + 'px';
+        no.style.top = (ph/2 - btnH/2) + 'px';
+        no.style.left = (pw/2 + 60) + 'px';
+      }
+
+      function rect(el){
+        const r = el.getBoundingClientRect();
+        const pr = playground.getBoundingClientRect();
+        return {left:r.left-pr.left, top:r.top-pr.top, width:r.width, height:r.height};
+      }
+
+      function intersects(a,b){
+        return !(a.left + a.width <= b.left || b.left + b.width <= a.left || a.top + a.height <= b.top || b.top + b.height <= a.top);
+      }
+
+      function placeNoRandom(){
+        const pw = playground.clientWidth;
+        const ph = playground.clientHeight;
+        const btnW = no.offsetWidth;
+        const btnH = no.offsetHeight;
+        const yesR = rect(yes);
+        let attempts = 0, placed = false;
+        while(attempts < 150 && !placed){
+          attempts++;
+          const left = Math.floor(Math.random() * (pw - btnW - 8)) + 4;
+          const top  = Math.floor(Math.random() * (ph - btnH - 8)) + 4;
+          const testRect = {left, top, width:btnW, height:btnH};
+          if(!intersects(testRect, yesR)){
+            no.style.left = left + 'px';
+            no.style.top = top + 'px';
+            no.animate([{transform:'scale(1.1)'},{transform:'scale(1)'}],{duration:180,easing:'ease-out'});
+            placed = true;
+          }
+        }
+      }
+
+      const HIT_RADIUS = 110;
+      function onMouseMove(e){
+        const pr = playground.getBoundingClientRect();
+        const mx = e.clientX - pr.left;
+        const my = e.clientY - pr.top;
+        const noR = rect(no);
+        const noCenterX = noR.left + noR.width/2;
+        const noCenterY = noR.top + noR.height/2;
+        const dx = mx - noCenterX;
+        const dy = my - noCenterY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < HIT_RADIUS){
+          placeNoRandom();
+        }
+      }
+
+      function resetPositions(){
+  setInitialPositions();
+}
+
+yes.addEventListener('click', () => {
+  audio.currentTime = 0;
+  audio.play();
+  setTimeout(() => alert('Yay! YÊU BẠN NHẤT 💖'), 400);
+  resetPositions();
+});
+
+no.addEventListener('click', () => {
+  audio.pause();
+  audio.currentTime = 0;
+  alert('Thôi mà, chọn "Yes" đi!');
+  resetPositions();
+});
+      playground.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('resize', resetPositions);
+      setInitialPositions();
+    })();
+  </script>
+</body>
+</html>
